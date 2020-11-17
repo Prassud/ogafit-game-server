@@ -21,7 +21,7 @@ point on correct, -1 on a wrong key and 0 for timeouts.
 
 
 ## Define Environment varibles
-Below are the environment variables to be configured to start the web client
+Below are the environment variables to be configured to start the web server
 
 
 | Variable                    | Description                                            | Default (if present) |
