@@ -1,0 +1,5 @@
+game:
+  instructionTimeLimit: 5
+  minScoreToTerminate: -3
+  maxScoreToTerminate: 10
+  maxContinuousAttempt: 3
