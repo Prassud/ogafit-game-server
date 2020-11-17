@@ -1,5 +1,5 @@
 game:
-  instructionTimeLimit: 5
-  minScoreToTerminate: -3
-  maxScoreToTerminate: 10
-  maxContinuousAttempt: 3
+  instructionTimeLimit: ${INSTRUCTION_TIME_LIMIT:5}
+  minScoreToTerminate: ${MIN_SCORE_TO_TERMINATE:-3}
+  maxScoreToTerminate: ${MAX_SCORE_TO_TERMINATE:10}
+  maxContinuousAttempt: ${MAX_CONTINUOUS_ATTEMPT:10}
