@@ -17,8 +17,8 @@ public class ClientController {
     private final ClientService clientService;
 
     @MessageMapping("/clients/{clientId}")
-    @SendTo("/topic/clients/{ClientId}")
-    public Client greeting(@Payload Client client, @DestinationVariable String clientId) {
+    @SendTo("/topic/clients/{clientId}")
+    public Client register(@Payload Client client, @DestinationVariable String clientId) {
         return clientService.create(client);
     }
 }

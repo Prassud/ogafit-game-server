@@ -2,6 +2,7 @@ package com.ogofit.game.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -10,6 +11,7 @@ import java.time.temporal.TemporalUnit;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
 public class Instruction {
     private String key;
     private UUID id;

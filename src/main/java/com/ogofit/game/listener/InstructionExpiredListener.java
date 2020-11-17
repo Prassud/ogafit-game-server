@@ -30,8 +30,13 @@ public class InstructionExpiredListener implements NotificationListener {
 
         if (instructionService.isReachedMaxContinuousAttempt(client)) {
             log.info("Has Reached Maximum Continuous Attempt");
-            String destination = "/clients/" + client.getId() + "/close";
+            String destination = "/topic/clients/" + client.getId() + "/close";
             Response response = Response.builder().client(client).status("CLOSE").build();
+            simpMessagingTemplate.convertAndSend(destination, response);
+        } else {
+            log.info("Instruction is Expired");
+            String destination = "/topic/clients/" + client.getId() + "/instructions/expired";
+            Response response = Response.builder().client(client).status("EXPIRED").build();
             simpMessagingTemplate.convertAndSend(destination, response);
         }
     }

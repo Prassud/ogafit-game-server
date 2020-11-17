@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 @Component
 @RequiredArgsConstructor
@@ -25,35 +24,23 @@ public class InstructionService {
     }
 
     public Instruction createInstruction(Instruction instruction) {
-        Optional<Instruction> activeInstruction = getActiveInstruction(instruction);
-        if (activeInstruction.isPresent()) {
-            handleActiveInstruction(instruction, activeInstruction);
-        } else {
-            instructionRepository.add(instruction);
-        }
+        Client client = clientService.getClient(instruction.getClient().getId());
+        instruction.setClient(client);
+        instructionRepository.add(instruction);
         return instruction;
     }
 
-    private void handleActiveInstruction(Instruction instruction, Optional<Instruction> activeInstruction) {
-        Instruction activeInst = activeInstruction.get();
-        if (!isMatchingInstruction(activeInst.getKey(), instruction)) {
-            clientService.decrementScore(activeInst.getClient());
+    private void handleActiveInstruction(Instruction instruction, Instruction activeInstruction) {
+        activeInstruction.setActive(false);
+        if (!isMatchingInstruction(activeInstruction.getKey(), instruction)) {
+            decrementScore(activeInstruction);
         } else {
-            clientService.incrementScore(instruction.getClient());
+            incrementScore(activeInstruction);
         }
     }
 
     private boolean isMatchingInstruction(String key, Instruction instruction) {
         return instruction.getKey().equals(key);
-    }
-
-    private Optional<Instruction> getActiveInstruction(Instruction instruction) {
-        Client client = instruction.getClient();
-        List<Instruction> instructions = instructionRepository.get(client.getId().toString());
-        return instructions
-                .stream()
-                .filter(eachInst -> !eachInst.isExpired())
-                .findFirst();
     }
 
     public void markAsExpired(Instruction instruction) {
@@ -63,18 +50,46 @@ public class InstructionService {
 
     public boolean isReachedMaxContinuousAttempt(Client client) {
         List<Instruction> instructions = getInstruction(client);
-        int continuousInstruction = 0;
+        int continuousInstructionCount = 0;
         for (int index = 0; index < instructions.size(); index++) {
-            Instruction instruction = instructions.get(0);
+            Instruction instruction = instructions.get(index);
             if (!instruction.isExpired()) {
-                continuousInstruction = 0;
+                continuousInstructionCount = 0;
                 continue;
             }
-            continuousInstruction++;
-            if (continuousInstruction == gameConfig.getMaxContinuousAttempt()) {
+            continuousInstructionCount++;
+            if (continuousInstructionCount == gameConfig.getMaxContinuousAttempt()) {
                 return true;
             }
         }
         return false;
+    }
+
+    public Instruction verify(Instruction instruction) {
+        Optional<Instruction> instructions = getActiveInstruction(instruction);
+        if (instructions.isPresent()) {
+            handleActiveInstruction(instruction, instructions.get());
+        }
+        return instruction;
+    }
+
+    private Optional<Instruction> getActiveInstruction(Instruction instruction) {
+        Client client = instruction.getClient();
+        List<Instruction> instructions = instructionRepository.get(client.getId().toString());
+        return instructions
+                .stream()
+                .filter(Instruction::isActive)
+                .filter(instruction1 -> !instruction1.isExpired())
+                .findFirst();
+    }
+
+    private void incrementScore(Instruction instruction) {
+        instruction.getClient().getScore().increment();
+        notificationService.notify(Constants.SCORE_CHANGE_NOTIFICATION_TYPE, instruction);
+    }
+
+    private void decrementScore(Instruction instruction) {
+        instruction.getClient().getScore().decrement();
+        notificationService.notify(Constants.SCORE_CHANGE_NOTIFICATION_TYPE, instruction);
     }
 }

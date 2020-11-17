@@ -2,6 +2,7 @@ package com.ogofit.game.task;
 
 import com.ogofit.game.configuration.GameConfig;
 import com.ogofit.game.models.Client;
+import com.ogofit.game.models.Instruction;
 import com.ogofit.game.service.ClientService;
 import com.ogofit.game.service.InstructionService;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,12 @@ public class InstructionLimitCheckTask extends AbstractTask {
         List<Client> clients = clientService.getClients();
         clients
                 .stream()
-                .map(instructionService::getInstruction)
+                .map(client -> instructionService.getInstruction(client))
                 .flatMap(List::stream)
+                .filter(instruction -> !instruction.isExpired())
+                .filter(Instruction::isActive)
                 .filter(instruction -> instruction.isExpired(gameConfig.getInstructionTimeLimit()))
-                .forEach(instruction -> instructionService.markAsExpired(instruction));
+                .forEach(instructionService::markAsExpired);
     }
 
     @Override

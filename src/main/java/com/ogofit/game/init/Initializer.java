@@ -1,5 +1,6 @@
 package com.ogofit.game.init;
 
+import com.ogofit.game.listener.InstructionExpiredListener;
 import com.ogofit.game.listener.ScoreChangeListener;
 import com.ogofit.game.scheduler.GameScheduler;
 import com.ogofit.game.service.NotificationService;
@@ -28,6 +29,9 @@ public class Initializer {
         notificationService
                 .register(Constants.SCORE_CHANGE_NOTIFICATION_TYPE,
                         context.getBean(ScoreChangeListener.class));
+        notificationService
+                .register(Constants.INSTRCUTION_EXPIRED_NOTIFICATION_TYPE,
+                        context.getBean(InstructionExpiredListener.class));
         tasks.forEach(scheduler::schedule);
     }
 }

@@ -1,21 +1,29 @@
 package com.ogofit.game.models;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static java.util.Optional.ofNullable;
+
 @Data
+@NoArgsConstructor
 public class Score {
     private AtomicLong value;
 
     public void decrement() {
-        this.value = Optional.ofNullable(value).orElse(new AtomicLong(0));
+        if (null == this.value) {
+            this.value = new AtomicLong(0);
+        }
         value.decrementAndGet();
     }
 
     public void increment() {
-        this.value = Optional.ofNullable(value).orElse(new AtomicLong(0));
-        value.incrementAndGet();
+        if (null == this.value) {
+            this.value = new AtomicLong(0);
+        }
+        this.value.incrementAndGet();
     }
 }
